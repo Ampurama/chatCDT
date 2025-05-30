@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import MathJax from "react-mathjax";
+import { MathJax, MathJaxContext } from "better-react-mathjax";
 
 
 
@@ -257,7 +257,7 @@ const ChatPage = () => {
     }
 
     return (
-      <MathJax.Provider>
+      <MathJaxContext>
         {parts.map((part, index) => {
           if (part.type === "code") {
             return (
@@ -271,7 +271,7 @@ const ChatPage = () => {
 
           if (part.type === "math-block") {
             return (
-              <MathJax.Node key={index} formula={part.content} />
+              <MathJax key={index} inline={false}>{part.content}</MathJax>
             );
           }
 
@@ -288,7 +288,7 @@ const ChatPage = () => {
               );
             }
             inlineParts.push(
-              <MathJax.Node inline key={segKey++} formula={inlineMatch[1]} />
+              <MathJax key={segKey++} inline>{inlineMatch[1]}</MathJax>
             );
             lastIdx = inlineMatch.index + inlineMatch[0].length;
           }
@@ -351,7 +351,7 @@ const ChatPage = () => {
             </span>
           );
         })}
-      </MathJax.Provider>
+      </MathJaxContext>
     );
   };
 
