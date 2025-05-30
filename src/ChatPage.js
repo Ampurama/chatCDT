@@ -434,7 +434,7 @@ const ChatPage = () => {
         </div>
 
       </div>
-      
+
 
       <div
         className="chat-main"
@@ -524,7 +524,10 @@ const ChatPage = () => {
           <div className={`chat-input-header ${newChatStarted ? "visible" : "hidden"}`}>
             What can I help you with today?
           </div>
-
+          {/* File Info di atas input box */}
+          {selectedFile && (
+            <FileInfo file={selectedFile} onRemove={() => setSelectedFile(null)} />
+          )}
           {/* Input box dan tombol */}
           <div
             className="chat-input-box"
@@ -533,9 +536,7 @@ const ChatPage = () => {
               transition: "margin-top 0.3s ease",
             }}
           >
-            {selectedFile && (
-              <FileInfo file={selectedFile} onRemove={() => setSelectedFile(null)} />
-            )}
+
 
             <label htmlFor="fileInput" className="file-input-label">
               <img src="/icons/folder.png" alt="upload icon" className="icon-img" />
