@@ -770,95 +770,45 @@ body.dark-mode .chat-footer-note a {
   color: #4ea3ff;
 }
 
-/* ====== RESPONSIVE ====== */
 @media (max-width: 768px) {
   .sidebar {
-    width: 200px;
+    width: 80%;
+    max-width: 300px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    background-color: #fff;
+    z-index: 999;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
   }
 
-  .topbar-modern {
+  .sidebar.open {
     left: 0;
   }
 
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.3);
+    z-index: 998;
+  }
+
+  .sidebar-backdrop.show {
+    display: block;
+  }
+
   .chat-main {
-    margin-left: 0;
-  }
-
-  .chat-box {
+    margin-left: 0 !important;
     width: 100%;
-    max-width: 100%;
-    padding: 0 10px;
   }
 
-  .chat-input-box {
-    width: 100%;
-    max-width: 100%;
-    padding: 6px 10px;
-  }
-
-  .chat-input-header {
-    width: 100%;
-    max-width: 100%;
-    font-size: 16px;
-  }
-
-  .chat-input-wrapper {
-    width: 100%;
-    max-width: 100%;
-    padding: 10px;
-  }
-
-  .topbar-title {
-    font-size: 14px;
-  }
-
-  .topbar-button {
-    font-size: 12px;
-    padding: 4px 6px;
-  }
-
-  .topbar-card {
-    padding: 2px 4px;
-  }
-
-  .chat-msg.assistant .msg-content,
-  .chat-msg.user .msg-content {
-    max-width: 90%;
-  }
-
-  .file-info {
-    max-width: 100%;
-    font-size: 10px;
-  }
-
-  .chat-image-preview img {
-    max-width: 90%;
-  }
-}
-
-@media (max-width: 480px) {
-  .sidebar {
-    width: 160px;
-  }
-
-  .topbar-title {
-    font-size: 12px;
-  }
-
-  .chat-input-header {
-    font-size: 14px;
-  }
-
-  .chat-input {
-    font-size: 10px;
-  }
-
-  .chat-footer-note {
-    font-size: 8px;
-  }
-
-  .chat-input-box button {
-    font-size: 12px;
-    padding: 6px 8px;
+  .topbar-modern {
+    left: 0 !important;
   }
 }
