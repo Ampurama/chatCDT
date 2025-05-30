@@ -360,81 +360,78 @@ const ChatPage = () => {
   return (
     <div className={`chat-wrapper ${darkMode ? "dark-mode" : ""}`}>
       {sidebarOpen && (
-        <div className="sidebar-backdrop show" onClick={() => setSidebarOpen(false)}></div>
+        <div className="sidebar">
+          <div className="sidebar-header">
+            <div className="logo">
+              <span className="logo-text">CDT.AI</span>
+            </div>
+            <button className="close-btn" onClick={() => setSidebarOpen(false)}>✕</button>
+          </div>
+
+          <div className="sidebar-content">
+            <button className="new-chat-btn" onClick={startNewChat}>+ New Chat</button>
+            <div className="sidebar-menu">
+              <button className="sidebar-btn">
+                <img src="/icons/explore.png" alt="Explore" className="icon-img" />
+                Explore
+              </button>
+              <button className="sidebar-btn">
+                <img src="/icons/history.png" alt="history" className="icon-img" />
+                History
+              </button>
+            </div>
+
+            <div className="recent-chats">
+              <div className="recent-item">
+                <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
+                Translate Resume
+              </div>
+              <div className="recent-item">
+                <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
+                PDF Invoice Helper
+              </div>
+              <div className="recent-item">
+                <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
+                Image to Text
+              </div>
+            </div>
+
+          </div>
+          <div className="sidebar-settings" onClick={toggleSettingsPopup} style={{ cursor: "pointer" }}>
+            <img src="/icons/setting.png" alt="Settings" className="icon-img" />
+            <span>Settings</span>
+          </div>
+
+
+          <div className="sidebar-user">
+            <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1, }}>
+              <img
+                src="/icons/profile.png"
+                alt="User Avatar"
+                className="sidebar-avatar"
+                style={{ marginRight: '12px' }}
+              />
+              <div className="sidebar-username">{username}</div>
+            </div>
+            <button
+              className="logout-inline-btn"
+              onClick={() => {
+                localStorage.removeItem("token");
+                navigate("/login");
+              }}
+              aria-label="Logout"
+            >
+              <img
+                src="/icons/exit.png"
+                alt="Logout Icon"
+                className="logout-icon"
+                style={{ width: '10px', height: '10px' }}
+              />
+            </button>
+          </div>
+
+        </div>
       )}
-      <div className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-
-        <div className="sidebar-header">
-          <div className="logo">
-            <span className="logo-text">CDT.AI</span>
-          </div>
-          <button className="close-btn" onClick={() => setSidebarOpen(false)}>✕</button>
-        </div>
-
-        <div className="sidebar-content">
-          <button className="new-chat-btn" onClick={startNewChat}>+ New Chat</button>
-          <div className="sidebar-menu">
-            <button className="sidebar-btn">
-              <img src="/icons/explore.png" alt="Explore" className="icon-img" />
-              Explore
-            </button>
-            <button className="sidebar-btn">
-              <img src="/icons/history.png" alt="history" className="icon-img" />
-              History
-            </button>
-          </div>
-
-          <div className="recent-chats">
-            <div className="recent-item">
-              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
-              Translate Resume
-            </div>
-            <div className="recent-item">
-              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
-              PDF Invoice Helper
-            </div>
-            <div className="recent-item">
-              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
-              Image to Text
-            </div>
-          </div>
-
-        </div>
-        <div className="sidebar-settings" onClick={toggleSettingsPopup} style={{ cursor: "pointer" }}>
-          <img src="/icons/setting.png" alt="Settings" className="icon-img" />
-          <span>Settings</span>
-        </div>
-
-
-        <div className="sidebar-user">
-          <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1, }}>
-            <img
-              src="/icons/profile.png"
-              alt="User Avatar"
-              className="sidebar-avatar"
-              style={{ marginRight: '12px' }}
-            />
-            <div className="sidebar-username">{username}</div>
-          </div>
-          <button
-            className="logout-inline-btn"
-            onClick={() => {
-              localStorage.removeItem("token");
-              navigate("/login");
-            }}
-            aria-label="Logout"
-          >
-            <img
-              src="/icons/exit.png"
-              alt="Logout Icon"
-              className="logout-icon"
-              style={{ width: '10px', height: '10px' }}
-            />
-          </button>
-        </div>
-
-      </div>
-      
 
       <div
         className="chat-main"
