@@ -7,6 +7,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 
 
+const API_URL = "https://8dba-2404-c0-4670-00-140d-2ee5.ngrok-free.app/api";
 
 
 const CodeBlockWithCopy = ({ code, language = "text" }) => {
@@ -112,7 +113,7 @@ const ChatPage = () => {
 
   const fetchHistories = async (token) => {
     try {
-      const res = await fetch("/api/chat/history", {
+      const res = await fetch(`${API_URL}/chat/history`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -161,19 +162,25 @@ const ChatPage = () => {
 
     try {
       let response;
+      const token = localStorage.getItem("token");
+
       if (selectedFile) {
         const formData = new FormData();
         formData.append("file", selectedFile);
         formData.append("message", userMessage || "");
-        response = await fetch("/api/chat/upload", {
+        response = await fetch(`${API_URL}/chat/upload`, {
           method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
         setSelectedFile(null);
       } else {
-        response = await fetch("/api/chat", {
+        response = await fetch(`${API_URL}/chat`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({ messages: newMessages }),
         });
       }
@@ -185,14 +192,12 @@ const ChatPage = () => {
       ]);
       setLoading(false);
 
-      // Save history chat
       await saveHistoryChat(
         "New Chat - " + new Date().toLocaleString(),
         [...newMessages, { role: "assistant", content: data.reply }]
       );
 
-      // Reload sidebar histories
-      fetchHistories(localStorage.getItem("token"));
+      fetchHistories(token);
     } catch (err) {
       console.error(err);
       setMessages((prev) => [
@@ -206,7 +211,7 @@ const ChatPage = () => {
   const saveHistoryChat = async (title, messages) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch("/api/chat/history", {
+      await fetch(`${API_URL}/chat/history`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -222,7 +227,7 @@ const ChatPage = () => {
   const loadHistoryChat = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/chat/history/${id}`, {
+      const res = await fetch(`${API_URL}/chat/history/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -244,6 +249,7 @@ const ChatPage = () => {
     if (!file) return null;
     const isImage = file.type.startsWith("image/");
     const previewSrc = isImage ? URL.createObjectURL(file) : "/icons/file-icon.png";
+
     return (
       <div className="file-info">
         <img src={previewSrc} alt="file preview" className="file-preview" />
