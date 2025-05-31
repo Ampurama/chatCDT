@@ -88,6 +88,7 @@ const ChatPage = () => {
   const [username, setUsername] = useState("");
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [histories, setHistories] = useState([]);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -98,7 +99,6 @@ const ChatPage = () => {
     setShowSettingsPopup(!showSettingsPopup);
   };
 
-  // 🚨 Redirect jika belum login
   useEffect(() => {
     const token = localStorage.getItem("token");
     const name = localStorage.getItem("username");
@@ -106,14 +106,25 @@ const ChatPage = () => {
       navigate("/login");
     } else {
       setUsername(name || "User");
+      fetchHistories(token);
     }
   }, [navigate]);
 
+  const fetchHistories = async (token) => {
+    try {
+      const res = await fetch("/api/chat/history", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setHistories(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
   useEffect(scrollToBottom, [messages]);
 
   const startNewChat = () => {
@@ -125,7 +136,6 @@ const ChatPage = () => {
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
-
   };
 
   const sendMessage = async () => {
@@ -133,13 +143,16 @@ const ChatPage = () => {
     if (!userMessage && !selectedFile) return;
 
     const newMessages = [...messages];
-
     let userContent = userMessage;
     if (selectedFile) {
       userContent += `\n[File: ${selectedFile.name}]`;
     }
 
-    newMessages.push({ role: "user", content: userContent, file: selectedFile ? URL.createObjectURL(selectedFile) : null });
+    newMessages.push({
+      role: "user",
+      content: userContent,
+      file: selectedFile ? URL.createObjectURL(selectedFile) : null,
+    });
 
     setMessages(newMessages);
     setInput("");
@@ -152,13 +165,13 @@ const ChatPage = () => {
         const formData = new FormData();
         formData.append("file", selectedFile);
         formData.append("message", userMessage || "");
-        response = await fetch("https://8dba-2404-c0-4670-00-140d-2ee5.ngrok-free.app/api/chat/upload", {
+        response = await fetch("/api/chat/upload", {
           method: "POST",
           body: formData,
         });
         setSelectedFile(null);
       } else {
-        response = await fetch("https://8dba-2404-c0-4670-00-140d-2ee5.ngrok-free.app/api/chat", {
+        response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages: newMessages }),
@@ -166,14 +179,20 @@ const ChatPage = () => {
       }
 
       const data = await response.json();
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.reply || "Tidak ada jawaban dari AI." },
+      ]);
+      setLoading(false);
 
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: data.reply || "Tidak ada jawaban dari AI." },
-        ]);
-        setLoading(false);
-      }, 1200);
+      // Save history chat
+      await saveHistoryChat(
+        "New Chat - " + new Date().toLocaleString(),
+        [...newMessages, { role: "assistant", content: data.reply }]
+      );
+
+      // Reload sidebar histories
+      fetchHistories(localStorage.getItem("token"));
     } catch (err) {
       console.error(err);
       setMessages((prev) => [
@@ -181,6 +200,36 @@ const ChatPage = () => {
         { role: "assistant", content: "Gagal memproses permintaan." },
       ]);
       setLoading(false);
+    }
+  };
+
+  const saveHistoryChat = async (title, messages) => {
+    try {
+      const token = localStorage.getItem("token");
+      await fetch("/api/chat/history", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title, messages }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadHistoryChat = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/chat/history/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setMessages(data.messages);
+      setSidebarOpen(false);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -195,7 +244,6 @@ const ChatPage = () => {
     if (!file) return null;
     const isImage = file.type.startsWith("image/");
     const previewSrc = isImage ? URL.createObjectURL(file) : "/icons/file-icon.png";
-
     return (
       <div className="file-info">
         <img src={previewSrc} alt="file preview" className="file-preview" />
@@ -385,19 +433,19 @@ const ChatPage = () => {
           </div>
 
           <div className="recent-chats">
-            <div className="recent-item">
-              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
-              Translate Resume
-            </div>
-            <div className="recent-item">
-              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
-              PDF Invoice Helper
-            </div>
-            <div className="recent-item">
-              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
-              Image to Text
-            </div>
+            {histories.map((h) => (
+              <div
+                key={h.id}
+                className="recent-item"
+                onClick={() => loadHistoryChat(h.id)}
+                style={{ cursor: "pointer" }}
+              >
+                <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
+                {h.title}
+              </div>
+            ))}
           </div>
+
 
         </div>
         <div className="sidebar-settings" onClick={toggleSettingsPopup} style={{ cursor: "pointer" }}>
