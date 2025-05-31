@@ -88,8 +88,6 @@ const ChatPage = () => {
   const [username, setUsername] = useState("");
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [chatHistories, setChatHistories] = useState([]);
-  const [selectedChatId, setSelectedChatId] = useState(null);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -108,7 +106,6 @@ const ChatPage = () => {
       navigate("/login");
     } else {
       setUsername(name || "User");
-      fetchHistories(); // ➜ Fetch history saat login
     }
   }, [navigate]);
 
@@ -121,33 +118,14 @@ const ChatPage = () => {
 
   const startNewChat = () => {
     setMessages([]);
-    setInput("");
     setSelectedFile(null);
+    setInput("");
     setNewChatStarted(true);
-    setSelectedChatId(null); // ➜ Reset chatId
   };
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
 
-  };
-  const fetchHistories = async () => {
-    const token = localStorage.getItem("token");
-    const res = await fetch("/api/chat/histories", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setChatHistories(data);
-  };
-
-  const loadChat = async (id) => {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`/api/chat/histories/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setMessages(data.messages);
-    setSelectedChatId(data.id);
   };
 
   const sendMessage = async () => {
@@ -183,23 +161,25 @@ const ChatPage = () => {
         response = await fetch("https://8dba-2404-c0-4670-00-140d-2ee5.ngrok-free.app/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: newMessages, chat_id: selectedChatId, }),
+          body: JSON.stringify({ messages: newMessages }),
         });
       }
 
       const data = await response.json();
 
       setTimeout(() => {
-        setMessages((prev) => [...prev, { role: "assistant", content: data.reply || "Tidak ada jawaban dari AI." }]);
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.reply || "Tidak ada jawaban dari AI." },
+        ]);
         setLoading(false);
-        fetchHistories(); // ➜ Refresh history
-        if (!selectedChatId) {
-          setSelectedChatId(data.chat_id); // ➜ Set ID history baru
-        }
       }, 1200);
     } catch (err) {
       console.error(err);
-      setMessages((prev) => [...prev, { role: "assistant", content: "Gagal memproses permintaan." }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Gagal memproses permintaan." },
+      ]);
       setLoading(false);
     }
   };
@@ -405,16 +385,18 @@ const ChatPage = () => {
           </div>
 
           <div className="recent-chats">
-            {chatHistories.map((chat) => (
-              <div
-                key={chat.id}
-                className={`recent-item ${chat.id === selectedChatId ? "active" : ""}`}
-                onClick={() => loadChat(chat.id)}
-              >
-                <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
-                {chat.title}
-              </div>
-            ))}
+            <div className="recent-item">
+              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
+              Translate Resume
+            </div>
+            <div className="recent-item">
+              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
+              PDF Invoice Helper
+            </div>
+            <div className="recent-item">
+              <img src="/icons/schedule.png" alt="chat icon" className="icon-img" />
+              Image to Text
+            </div>
           </div>
 
         </div>
